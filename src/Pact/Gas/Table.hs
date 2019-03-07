@@ -149,7 +149,7 @@ defaultGasTable =
     ]
 
 tableGasModel :: GasCostConfig -> GasModel
-tableGasModel gasConfig = 
+tableGasModel gasConfig =
   let run name ga = case ga of
         GPostRead r -> case r of
           ReadData cols -> _gasCostConfig_readColumnCost gasConfig * fromIntegral (Map.size (_columns cols))

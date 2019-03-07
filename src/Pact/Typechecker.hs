@@ -89,24 +89,24 @@ walkAST f t@Prim {} = f Pre t >>= f Post
 walkAST f t@Var {} = f Pre t >>= f Post
 walkAST f t@Table {} = f Pre t >>= f Post
 walkAST f t@Object {} = do
-  Object {..} <- f Pre t
-  t' <- Object _aNode <$>
-         forM _aObject (\(k,v) -> (k,) <$> walkAST f v)
+  a <- f Pre t
+  t' <- Object (_aNode a) <$>
+         forM (_aObject a) (\(k,v) -> (k,) <$> walkAST f v)
   f Post t'
 walkAST f t@List {} = do
-  List {..} <- f Pre t
-  t' <- List _aNode <$> mapM (walkAST f) _aList
+  a <- f Pre t
+  t' <- List (_aNode a) <$> mapM (walkAST f) (_aList a)
   f Post t'
 walkAST f t@Binding {} = do
-  Binding {..} <- f Pre t
-  t' <- Binding _aNode <$>
-        forM _aBindings (\(k,v) -> (k,) <$> walkAST f v) <*>
-        mapM (walkAST f) _aBody <*> pure _aBindType
+  a <- f Pre t
+  t' <- Binding (_aNode a) <$>
+        forM (_aBindings a) (\(k,v) -> (k,) <$> walkAST f v) <*>
+        mapM (walkAST f) (_aBody a) <*> pure (_aBindType a)
   f Post t'
 walkAST f t@App {} = do
-  App {..} <- f Pre t
-  t' <- App _aNode <$>
-        (case _aAppFun of
+  a <- f Pre t
+  t' <- App (_aNode a) <$>
+        (case _aAppFun a of
            fun@FNative {..} -> case _fSpecial of
              Nothing -> return fun
              Just (fs,SBinding bod) -> do
@@ -117,11 +117,14 @@ walkAST f t@App {} = do
              db <- mapM (walkAST f) _fBody
              return $ set fBody db fun
         ) <*>
-        mapM (walkAST f) _aAppArgs
+        mapM (walkAST f) (_aAppArgs a)
   f Post t'
 walkAST f t@Step {} = do
-  Step {..} <- f Pre t
-  t' <- Step _aNode <$> traverse (walkAST f) _aEntity <*> walkAST f _aExec <*> traverse (walkAST f) _aRollback
+  a <- f Pre t
+  t' <- Step (_aNode a)
+    <$> traverse (walkAST f) (_aEntity a)
+    <*> walkAST f (_aExec a)
+    <*> traverse (walkAST f) (_aRollback a)
   f Post t'
 
 isConcreteTy :: Type n -> Bool
