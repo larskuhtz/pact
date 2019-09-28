@@ -50,7 +50,6 @@ in
             bytes = dontCheck super.bytes;
             intervals = dontCheck super.intervals;
             bound = dontCheck super.bound;
-            trifecta = dontCheck super.trifecta;
             lens-aeson = dontCheck super.lens-aeson;
             # test suite for this is failing on ghcjs:
             hw-hspec-hedgehog = dontCheck super.hw-hspec-hedgehog;
@@ -90,7 +89,12 @@ in
             # Prevent: "Setup: Encountered missing dependencies: doctest >=0.9"
             prettyprinter = dontCheck super.prettyprinter;
             prettyprinter-ansi-terminal = dontCheck super.prettyprinter-ansi-terminal;
-            prettyprinter-convert-ansi-wl-pprint = dontCheck super.prettyprinter-convert-ansi-wl-pprint;
+
+            trifecta = dontCheck (callHackageDirect {
+              pkg = "trifecta";
+              ver = "2.1";
+              sha256 = "0hbv8q12rgg4ni679fbx7ac3blzqxj06dw1fyr6ipc8kjpypb049";
+            });
 
             megaparsec = dontCheck (callHackageDirect {
               pkg = "megaparsec";

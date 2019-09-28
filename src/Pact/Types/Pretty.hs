@@ -29,7 +29,6 @@ module Pact.Types.Pretty
   , encloseSep
   , equals
   , fillSep
-  , fromAnsiWlPprint
   , hardline
   , hsep
   , indent
@@ -64,7 +63,6 @@ import qualified Data.HashMap.Strict  as HM
 import           Data.Int
 import           Data.Text            (Text, pack, unpack)
 import qualified Data.Text            as Text
-import           Data.Text.Prettyprint.Convert.AnsiWlPprint (fromAnsiWlPprint)
 import           Data.Text.Prettyprint.Doc
   (SimpleDocStream, annotate, unAnnotate, layoutPretty,
   defaultLayoutOptions, vsep, hsep, (<+>), colon, angles, list, braces,
