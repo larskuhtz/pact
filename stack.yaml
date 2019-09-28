@@ -11,6 +11,7 @@ extra-deps:
 
   # --- Forced Upgrades --- #
   - sbv-8.2
+  - trifecta-2.1
 
   # --- Custom Pins --- #
   - git: https://github.com/kadena-io/thyme.git
