@@ -16,7 +16,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.List.NonEmpty as NEL
 import Data.Text (Text, unpack)
 import qualified Data.Text as T
-import NeatInterpolation (text)
+import NeatInterpolation (trimming)
 import Network.HTTP.Client (Manager)
 import qualified Network.HTTP.Client as HTTP
 import Prelude hiding (concat)
@@ -151,9 +151,9 @@ testCorrectNextStep mgr = do
 
 threeStepPactCode :: String -> T.Text
 threeStepPactCode moduleName = T.concat [begCode, T.pack moduleName, endCode]
-     where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+     where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
             (module|]
-           endCode = [text| 'k
+           endCode = [trimming| 'k
               (defpact tester ()
                 (step "step 0")
                 (step "step 1")
@@ -233,9 +233,9 @@ testErrStep mgr = do
 
 errorStepPactCode :: String -> T.Text
 errorStepPactCode moduleName = T.concat [begCode, T.pack moduleName, endCode]
-     where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+     where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
                           (module|]
-           endCode = [text| 'k
+           endCode = [trimming| 'k
               (defpact tester ()
                 (step "step 0")
                 (step (+ "will throw error in step 1"))
@@ -292,9 +292,9 @@ testCorrectRollbackStep mgr = do
 
 pactWithRollbackCode :: String -> T.Text
 pactWithRollbackCode moduleName = T.concat [begCode, T.pack moduleName, endCode]
-  where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+  where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
                        (module|]
-        endCode = [text| 'k
+        endCode = [trimming| 'k
             (defpact tester ()
               (step-with-rollback "step 0" "rollback 0")
               (step-with-rollback "step 1" "rollback 1")
@@ -354,9 +354,9 @@ testRollbackErr mgr = do
 
 pactWithRollbackErrCode :: String -> T.Text
 pactWithRollbackErrCode moduleName = T.concat [begCode, T.pack moduleName, endCode]
-  where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+  where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
                        (module|]
-        endCode = [text| 'k
+        endCode = [trimming| 'k
             (defpact tester ()
               (step-with-rollback "step 0" "rollback 0")
               (step-with-rollback "step 1" (+ "will throw error in rollback 1"))
@@ -436,9 +436,9 @@ testValidYield mgr = do
 
 pactWithYield :: String -> T.Text
 pactWithYield moduleName = T.concat [begCode, T.pack moduleName, endCode]
-  where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+  where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
                        (module|]
-        endCode = [text| 'k
+        endCode = [trimming| 'k
             (defpact tester (name)
               (step
                 (let ((result0 (+ name "->Step0")))
@@ -481,9 +481,9 @@ testNoYield mgr = do
 
 pactWithYieldErr :: String -> T.Text
 pactWithYieldErr moduleName = T.concat [begCode, T.pack moduleName, endCode]
-  where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+  where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
                        (module|]
-        endCode = [text| 'k
+        endCode = [trimming| 'k
             (defpact tester (name)
               (step
                 (let ((result0 (+ name "->Step0")))
@@ -524,9 +524,9 @@ testResetYield mgr = do
 
 pactWithSameNameYield :: String -> T.Text
 pactWithSameNameYield moduleName = T.concat [begCode, T.pack moduleName, endCode]
-  where begCode = [text| (define-keyset 'k (read-keyset "admin-keyset"))
+  where begCode = [trimming| (define-keyset 'k (read-keyset "admin-keyset"))
                        (module|]
-        endCode = [text| 'k
+        endCode = [trimming| 'k
             (defpact tester ()
               (step
                 (let ((result0 "step 0"))
@@ -609,7 +609,7 @@ testCrossChainYield mgr = step0
 
 pactCrossChainYield :: T.Text
 pactCrossChainYield =
-  [text|
+  [trimming|
     (module cross-chain-tester GOV
       (defcap GOV () true)
       (defschema schema-a a-result:string)

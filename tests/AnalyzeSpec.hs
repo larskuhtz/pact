@@ -27,7 +27,7 @@ import           Data.SBV.Internals           (SBV (SBV))
 import           Data.Text                    (Text)
 import qualified Data.Text                    as T
 import           GHC.Stack                    (HasCallStack, withFrozenCallStack)
-import           NeatInterpolation            (text)
+import           NeatInterpolation            (trimming)
 import           Prelude                      hiding (read)
 import           Test.Hspec                   (Spec, describe,
                                                expectationFailure, it,
@@ -53,7 +53,7 @@ import           Pact.Analyze.Util
 
 wrap :: Text -> Text -> Text
 wrap code model =
-  [text|
+  [trimming|
     (env-keys ["admin"])
     (env-data { "keyset": { "keys": ["admin"], "pred": "=" } })
     (begin-tx)
@@ -86,7 +86,7 @@ wrap code model =
 
 wrapNoTable :: Text -> Text
 wrapNoTable code =
-  [text|
+  [trimming|
     (env-keys ["admin"])
     (env-data { "keyset": { "keys": ["admin"], "pred": "=" } })
     (begin-tx)
@@ -392,7 +392,7 @@ spec = describe "analyze" $ do
     let unlit = fromJust . unliteralS @Decimal
 
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let ((x:decimal (*
                   1.58113883008419202353012810347474735209747288392336210205455502815728238592
@@ -411,7 +411,7 @@ spec = describe "analyze" $ do
       2500000000000007812618040.433562734137684699135011741551181715981891159652849247733486729055338549963875582523604695139936764674737736206382376787827325735603006181405156090936148131370459148823374617217523084670407741689762536216481173675491045653179580074788284514172469055900877
 
     let code' =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let ((x:decimal (*
                   1581138830084.192052937980207914179905763920823196984267407804357031202155885633105058076747359551154153957331638299995511193600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -432,7 +432,7 @@ spec = describe "analyze" $ do
 
   describe "result" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer (x:integer)
               (* x -1))
           |]
@@ -442,7 +442,7 @@ spec = describe "analyze" $ do
 
   describe "inlining" $ do
     let code =
-          [text|
+          [trimming|
             (defun helper:integer (b:integer)
               (if (< b 10)
                 10
@@ -456,7 +456,7 @@ spec = describe "analyze" $ do
 
   describe "success" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (x:integer)
               (if (< x 10) true false))
           |]
@@ -465,7 +465,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.trivial" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce false "cannot pass"))
           |]
@@ -476,7 +476,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.conditional" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (x:integer)
               (if (< x 10)
                 (enforce (< x 5) "abort sometimes")
@@ -490,7 +490,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.sequence" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (x:integer)
               (enforce (> x 0) "positive")
               (enforce false "impossible")
@@ -502,7 +502,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.sequence" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (x:integer)
               (enforce (> x 0) "positive")
               (if (< x 10)
@@ -514,7 +514,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.sequence" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (x:integer)
               (enforce (> x 0) "positive")
               (if (< x 10)
@@ -531,7 +531,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.purity.read" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row i:integer)
             (deftable integers:{row})
 
@@ -544,7 +544,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.purity.write" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row i:integer)
             (deftable integers:{row})
 
@@ -557,7 +557,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.purity.insert" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row i:integer)
             (deftable integers:{row})
 
@@ -570,7 +570,7 @@ spec = describe "analyze" $ do
 
   describe "enforce.purity.update" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row i:integer)
             (deftable integers:{row})
 
@@ -583,7 +583,7 @@ spec = describe "analyze" $ do
 
   describe "read-keyset.equality" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce
                 (= (read-keyset "ks")
@@ -598,7 +598,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.name.static" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-keyset 'ks))
           |]
@@ -610,7 +610,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.name.dynamic" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-keyset (+ "k" "s")))
           |]
@@ -618,7 +618,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.value" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (ks:keyset)
               (enforce-keyset ks))
           |]
@@ -627,7 +627,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.purity" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row ks:keyset)
             (deftable keysets:{row})
 
@@ -638,7 +638,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-guard" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (ks:keyset)
               (enforce-guard ks))
           |]
@@ -647,7 +647,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-guard.purity" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row ks:keyset)
             (deftable keysets:{row})
 
@@ -658,7 +658,7 @@ spec = describe "analyze" $ do
 
   describe "read-decimal" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:decimal ()
               (read-decimal "foo"))
           |]
@@ -671,7 +671,7 @@ spec = describe "analyze" $ do
 
   describe "read-integer" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer ()
               (+ (read-integer "key")
                  (read-integer (+ "ke" "y"))))
@@ -687,7 +687,7 @@ spec = describe "analyze" $ do
   describe "read-string" $ do
     describe "value can be anything" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce
                   (= "arbitrary string"
@@ -699,7 +699,7 @@ spec = describe "analyze" $ do
 
     describe "read always produces the same value" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce
                   (= (read-string "some-key")
@@ -710,7 +710,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.at" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -731,7 +731,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.read" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -768,7 +768,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.read.syntax" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -790,7 +790,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.multiple-keysets" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -813,7 +813,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.write" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -859,7 +859,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.write-count" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -882,7 +882,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.write.invalidation" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -912,7 +912,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-guard.row-level" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer
@@ -933,7 +933,7 @@ spec = describe "analyze" $ do
 
   describe "keyset-ref-guard" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               @model [(property (authorized-by "foo"))]
               (enforce-guard (keyset-ref-guard "foo")))
@@ -942,7 +942,7 @@ spec = describe "analyze" $ do
 
   describe "create-pact-guard" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-guard (create-pact-guard "foo")))
           |]
@@ -952,7 +952,7 @@ spec = describe "analyze" $ do
 
   describe "create-user-guard passing" $ do
     let code =
-          [text|
+          [trimming|
             (defun enforce-range:bool (x:integer)
               (enforce (> x 1) ""))
 
@@ -964,7 +964,7 @@ spec = describe "analyze" $ do
 
   describe "create-user-guard failing" $ do
     let code =
-          [text|
+          [trimming|
             (defun enforce-impossible:bool ()
               (enforce false ""))
 
@@ -975,7 +975,7 @@ spec = describe "analyze" $ do
 
   describe "user guards can't fail unless enforced" $ do
     let code =
-          [text|
+          [trimming|
             (defun enforce-impossible:bool ()
               (enforce false ""))
 
@@ -986,7 +986,7 @@ spec = describe "analyze" $ do
 
   describe "call-by-value semantics for inlining" $ do
     let code =
-          [text|
+          [trimming|
             (defun id:string (s:string)
               s
               s)
@@ -1002,7 +1002,7 @@ spec = describe "analyze" $ do
 
   describe "trivial capability which always fails" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (i:integer)
               (enforce false "tx always fails"))
 
@@ -1014,7 +1014,7 @@ spec = describe "analyze" $ do
 
   describe "trivial capability which always succeeds" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (i:integer)
               true)
 
@@ -1026,7 +1026,7 @@ spec = describe "analyze" $ do
 
   describe "capability returning false succeeds because it doesn't throw" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (i:integer)
               false)
 
@@ -1038,7 +1038,7 @@ spec = describe "analyze" $ do
 
   describe "requesting token that was never granted" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (i:integer)
               true)
 
@@ -1049,7 +1049,7 @@ spec = describe "analyze" $ do
 
   describe "requesting token that was granted" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (i:integer b:bool)
               (enforce-keyset "foo"))
 
@@ -1064,7 +1064,7 @@ spec = describe "analyze" $ do
 
   describe "requesting different capability fails" $ do
     let code =
-          [text|
+          [trimming|
             (defcap FOO (i:integer)
               true)
 
@@ -1079,7 +1079,7 @@ spec = describe "analyze" $ do
 
   describe "requesting token that was not granted for the same args" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (i:integer)
               true)
 
@@ -1091,7 +1091,7 @@ spec = describe "analyze" $ do
 
   describe "require-capability does not execute the capability" $ do
     let code =
-          [text|
+          [trimming|
             (defcap CAP (k:string)
               ;; Insert can only succeed the *first and only* time it's run
               (insert accounts k {"balance": 0})
@@ -1108,7 +1108,7 @@ spec = describe "analyze" $ do
 
   describe "token caching works for expressions which perform computation" $ do
     let code =
-          [text|
+          [trimming|
             (defcap FOO (i:integer)
               true)
 
@@ -1120,7 +1120,7 @@ spec = describe "analyze" $ do
 
   describe "compose-capability grants an additional capability" $ do
     let code =
-          [text|
+          [trimming|
             (defcap FOO (i:integer)
               (if (> i 0)
                 (compose-capability (BAR false))
@@ -1138,7 +1138,7 @@ spec = describe "analyze" $ do
 
   describe "compose-capability can fail" $ do
     let code =
-          [text|
+          [trimming|
             (defcap FOO (i:integer)
               (compose-capability (BAR false)))
 
@@ -1153,7 +1153,7 @@ spec = describe "analyze" $ do
 
   describe "compose-capability only grants for specific arguments" $ do
     let code =
-          [text|
+          [trimming|
             (defcap FOO (i:integer)
               (compose-capability (BAR i)))
 
@@ -1168,7 +1168,7 @@ spec = describe "analyze" $ do
 
   describe "capabilities are not granted until the body of with-capability" $ do
     let code =
-          [text|
+          [trimming|
             (defcap BAR ()
               true)
 
@@ -1186,7 +1186,7 @@ spec = describe "analyze" $ do
 
   describe "compose-capability calls produce return values" $ do
     let code =
-          [text|
+          [trimming|
             (defcap BAR ()
               false)
             (defcap FOO ()
@@ -1202,7 +1202,7 @@ spec = describe "analyze" $ do
   let expectCapGovPass :: Text -> Check -> Spec
       expectCapGovPass code check = withFrozenCallStack $ expectTest $ testEnv
         { testCode =
-            [text|
+            [trimming|
               (begin-tx)
               (module test GOV
                 $code
@@ -1216,7 +1216,7 @@ spec = describe "analyze" $ do
 
   describe "capability-based governance is not analyzed and can always pass or fail" $ do
     let code =
-          [text|
+          [trimming|
             (defcap GOV ()
               true)
 
@@ -1230,7 +1230,7 @@ spec = describe "analyze" $ do
   describe "property language can describe whether cap-based governance \
     \passes" $ do
       res <- runIO $ runVerification $
-        [text|
+        [trimming|
           (begin-tx)
           (module test GOV
               (defcap GOV ()
@@ -1249,7 +1249,7 @@ spec = describe "analyze" $ do
   describe "property language can describe whether ks-based governance passes \
     \without mentioning the keyset" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 @model [(property governance-passes)]
                 (enforce-guard (create-module-guard "governance")))
@@ -1258,7 +1258,7 @@ spec = describe "analyze" $ do
 
   describe "keyset-based governance is connected to authorized-by" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               @model [(property (authorized-by 'ks))]
               (enforce-guard (create-module-guard "governance")))
@@ -1268,7 +1268,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.1" $ do
     let code =
-          [text|
+          [trimming|
         (defun test:bool (systime:time timeout:time)
           (enforce-one
             "Cancel can only be effected by creditor, or debitor after timeout"
@@ -1288,7 +1288,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.2" $ do
     let code =
-          [text|
+          [trimming|
         (defun test:bool ()
           (enforce-one ""
             [(enforce false "")
@@ -1300,7 +1300,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.3" $ do
     let code =
-          [text|
+          [trimming|
         (defun test:bool ()
           (enforce-one ""
             [(enforce false "")
@@ -1311,7 +1311,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.4" $ do
     let code =
-          [text|
+          [trimming|
         (defun test:bool ()
           (enforce-one ""
             [(enforce true "")
@@ -1326,7 +1326,7 @@ spec = describe "analyze" $ do
   -- `true`, one of its `enforce`s threw, so it fails.
   describe "enforce-one.5" $ do
     let code =
-          [text|
+          [trimming|
         (defun test:bool ()
           (enforce-one ""
             [(or (enforce false "")
@@ -1339,7 +1339,7 @@ spec = describe "analyze" $ do
   -- throws.
   describe "enforce-one.6" $ do
     let code =
-          [text|
+          [trimming|
         (defun test:bool ()
           (enforce-one ""
             [(or (enforce true "")
@@ -1351,7 +1351,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.7" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-one ""
                 [(enforce false "")
@@ -1367,7 +1367,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.8" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-one ""
                 [(enforce false "") false (enforce false "")]))
@@ -1378,7 +1378,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.9" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-one "" []))
           |]
@@ -1387,7 +1387,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.10" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-one "" [true])
               (enforce-one "" [false]))
@@ -1397,7 +1397,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.allow-reads" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row b:bool)
             (deftable bools:{row})
 
@@ -1412,7 +1412,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.disallow-writes" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row b:bool)
             (deftable bools:{row})
 
@@ -1427,7 +1427,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.purity-from-outer-enforce" $ do
     let code =
-          [text|
+          [trimming|
             (defschema row b:bool)
             (deftable bools:{row})
 
@@ -1444,7 +1444,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-one.single-case-regression" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce-one "regression" [true]))
           |]
@@ -1456,7 +1456,7 @@ spec = describe "analyze" $ do
 
   describe "string length" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer ()
               @model [ (property (= result 2)) ]
               (length "ab"))
@@ -1465,7 +1465,7 @@ spec = describe "analyze" $ do
 
   describe "list length" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer ()
               @model [ (property (= result 3)) ]
               (length [5 5 5]))
@@ -1474,7 +1474,7 @@ spec = describe "analyze" $ do
 
   describe "object length" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer ()
               @model [ (property (= result 3)) ]
               (length {"ab": 7, "cd": 8, "ef": 9}))
@@ -1483,7 +1483,7 @@ spec = describe "analyze" $ do
 
   describe "pact-id" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:string ()
               (pact-id))
           |]
@@ -1497,7 +1497,7 @@ spec = describe "analyze" $ do
   describe "logical short-circuiting" $ do
     describe "and" $ do
       let code =
-            [text|
+            [trimming|
           (defun test:bool (x: bool)
             (and x (enforce false "")))
             |]
@@ -1507,7 +1507,7 @@ spec = describe "analyze" $ do
 
     describe "or" $ do
       let code =
-            [text|
+            [trimming|
           (defun test:bool (x: bool)
             (or x (enforce false "")))
             |]
@@ -1517,7 +1517,7 @@ spec = describe "analyze" $ do
 
   describe "table-read.multiple-read" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer)
@@ -1540,7 +1540,7 @@ spec = describe "analyze" $ do
 
   describe "table-read.one-read" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer)
@@ -1564,7 +1564,7 @@ spec = describe "analyze" $ do
 
   describe "at.dynamic-key" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row
               name:string
               balance:integer)
@@ -1591,7 +1591,7 @@ spec = describe "analyze" $ do
 
   describe "at.object-in-object" $
     let code =
-          [text|
+          [trimming|
             (defschema inner   name:string)
             (defschema wrapper wrapped:object{inner})
 
@@ -1603,7 +1603,7 @@ spec = describe "analyze" $ do
 
   describe "object-equality" $
     let code =
-          [text|
+          [trimming|
             (defun test:bool (a:object{account})
               @doc ""
               @model [(property (and result (= a a)))]
@@ -1614,7 +1614,7 @@ spec = describe "analyze" $ do
 
   describe "object-inequality" $
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let ((acct1:object{account} {"balance": 10})
                     (acct2:object{account} {"balance": 5}))
@@ -1626,7 +1626,7 @@ spec = describe "analyze" $ do
 
   describe "merging-objects" $
     let code =
-          [text|
+          [trimming|
             (defschema person name:string age:integer)
 
             (defun test:object{person} ()
@@ -1640,7 +1640,7 @@ spec = describe "analyze" $ do
 
   describe "table-read" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1653,7 +1653,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.insert" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1686,7 +1686,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.insert.partial" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1697,7 +1697,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.update" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1708,7 +1708,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.update.partial" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1720,7 +1720,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.write" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1731,7 +1731,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.write.partial" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1742,7 +1742,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.conditional" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1757,7 +1757,7 @@ spec = describe "analyze" $ do
 
   describe "table-written.conditional" $ do
     let code =
-          [text|
+          [trimming|
             (defschema token-row balance:integer)
             (deftable tokens:{token-row})
 
@@ -1774,7 +1774,7 @@ spec = describe "analyze" $ do
 
   describe "conserves-mass.integer" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:string (from:string to:string amount:integer)
               "Transfer money between accounts"
               (let ((from-bal (at 'balance (read accounts from)))
@@ -1791,7 +1791,7 @@ spec = describe "analyze" $ do
 
   describe "conserves-mass.integer.insert" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:string ()
               "create a new account with 0 balance"
               (insert accounts "stu" { "balance": 0 }))
@@ -1802,7 +1802,7 @@ spec = describe "analyze" $ do
 
   describe "conserves-mass.integer.without-uniqueness" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:string (from:string to:string amount:integer)
               "Transfer money between accounts"
               (let ((from-bal (at 'balance (read accounts from)))
@@ -1819,7 +1819,7 @@ spec = describe "analyze" $ do
 
   describe "conserves-mass.decimal" $ do
     let code =
-          [text|
+          [trimming|
             (defschema account2
               @doc   "accounts schema"
               @model [(invariant (>= balance 0.0))]
@@ -1841,7 +1841,7 @@ spec = describe "analyze" $ do
 
   describe "conserves-mass.decimal.insert" $ do
     let code =
-          [text|
+          [trimming|
             (defschema account2
               @doc   "accounts schema"
               @model [(invariant (>= balance 0.0))]
@@ -1858,7 +1858,7 @@ spec = describe "analyze" $ do
 
   describe "conserves-mass.decimal.failing-invariant" $ do
     let code =
-          [text|
+          [trimming|
             (defschema account
               @doc   "accounts schema"
               @model [(invariant (>= balance 0.0))]
@@ -1920,7 +1920,7 @@ spec = describe "analyze" $ do
 
   describe "cell-delta.integer" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:string ()
               @model
                 [ (property
@@ -1963,7 +1963,7 @@ spec = describe "analyze" $ do
 
   describe "with-read" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (acct:string)
               (update accounts acct { "balance": 10 })
               (with-read accounts acct { "balance" := bal }
@@ -1975,7 +1975,7 @@ spec = describe "analyze" $ do
 
   describe "with-read.nested" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (acct:string)
               (update accounts acct { "balance": 0 })
               (with-read accounts acct { "balance" := bal }
@@ -1989,7 +1989,7 @@ spec = describe "analyze" $ do
 
   describe "with-read.overlapping-names" $ do
     let code =
-          [text|
+          [trimming|
             (defschema owner "Pet owner" cats:integer dogs:integer)
             (deftable owners:{owner} "Table of pet owners")
 
@@ -2008,7 +2008,7 @@ spec = describe "analyze" $ do
 
   describe "bind.from-read" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer ()
               (update accounts "bob" { "balance": 10 })
               (let ((obj:object{account} (read accounts "bob")))
@@ -2022,7 +2022,7 @@ spec = describe "analyze" $ do
 
   describe "bind.from-literal" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:integer ()
               (let ((acct:object{account} { "balance": 10 }))
                 (bind acct { "balance" := bal }
@@ -2036,7 +2036,7 @@ spec = describe "analyze" $ do
     describe "sanity" $ do
       describe "1" $
         let code =
-              [text|
+              [trimming|
                 (defun test:bool (x:integer)
                   (let ((y x)
                         (z (+ 10 x)))
@@ -2047,7 +2047,7 @@ spec = describe "analyze" $ do
 
       describe "2" $
         let code =
-              [text|
+              [trimming|
                 (defun test:bool (x:integer)
                   (let ((y x)
                         (z (+ 10 x)))
@@ -2058,7 +2058,7 @@ spec = describe "analyze" $ do
 
     describe "let*.sanity" $
         let code =
-              [text|
+              [trimming|
                 (defun test:bool (x:integer)
                   (let* ((x 2)
                          (y (* x 10)))
@@ -2068,7 +2068,7 @@ spec = describe "analyze" $ do
 
     describe "nested" $
         let code =
-              [text|
+              [trimming|
                 (defun test:bool (x:integer)
                   (let ((x (let ((y 2)) y))
                         (y (let ((x 3)) x)))
@@ -2080,7 +2080,7 @@ spec = describe "analyze" $ do
   describe "chain-data" $ do
     describe "block-height field" $
       let code =
-            [text|
+            [trimming|
               (defun test:integer ()
                 @model [(property (>= result 0))]
                 (at "block-height" (chain-data)))
@@ -2089,7 +2089,7 @@ spec = describe "analyze" $ do
 
     describe "block-time field" $
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce
                   (= (at "block-time" (chain-data))
@@ -2100,7 +2100,7 @@ spec = describe "analyze" $ do
 
     describe "chain-id field" $
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce
                   (= (at "chain-id" (chain-data))
@@ -2111,7 +2111,7 @@ spec = describe "analyze" $ do
 
     describe "gas-limit field" $
       let code =
-            [text|
+            [trimming|
               (defun test:integer ()
                 @model [(property (>= result 0))]
                 (at "gas-limit" (chain-data)))
@@ -2120,7 +2120,7 @@ spec = describe "analyze" $ do
 
     describe "gas-price field" $
       let code =
-            [text|
+            [trimming|
               (defun test:decimal ()
                 @model [(property (>= result 0.0))]
                 (at "gas-price" (chain-data)))
@@ -2129,7 +2129,7 @@ spec = describe "analyze" $ do
 
     describe "sender field" $
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce
                   (= (at "sender" (chain-data))
@@ -2140,7 +2140,7 @@ spec = describe "analyze" $ do
 
     describe "prev-block-hash field" $
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce
                   (= (at "prev-block-hash" (chain-data))
@@ -2151,7 +2151,7 @@ spec = describe "analyze" $ do
 
     describe "caching" $
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 @model [(property result)]
                 (= (chain-data) (chain-data)))
@@ -2160,7 +2160,7 @@ spec = describe "analyze" $ do
 
   describe "time" $
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let ((startTime:time (time "2016-07-22T12:00:00Z")))
                 (enforce
@@ -2218,7 +2218,7 @@ spec = describe "analyze" $ do
       describe "concrete string" $ do
         describe "valid inputs" $
           let code =
-                [text|
+                [trimming|
                   (defun test:bool ()
                     (enforce (= (str-to-int "5") 5) "")
                     (enforce (= (str-to-int "11111111111111111111111") 11111111111111111111111) "")
@@ -2228,12 +2228,12 @@ spec = describe "analyze" $ do
 
         describe "invalid inputs" $ do
           for_ ["", "-123", "abc", "123a", "a123", T.replicate 129 "1"] $ \str ->
-            expectFail [text|(defun test:integer () (str-to-int "$str"))|] $
+            expectFail [trimming|(defun test:integer () (str-to-int "$str"))|] $
               Valid Success'
 
       describe "symbolic string" $ do
         let code =
-              [text|
+              [trimming|
                 (defun test:integer (s:string)
                   (str-to-int s))
               |]
@@ -2249,7 +2249,7 @@ spec = describe "analyze" $ do
       describe "concrete string and base" $ do
         describe "valid inputs" $
           let code =
-                [text|
+                [trimming|
                   (defun test:bool ()
                     (enforce (= (str-to-int 10 "5") 5) "")
                     (enforce (= (str-to-int 8 "10") 8) "")
@@ -2260,19 +2260,19 @@ spec = describe "analyze" $ do
         describe "invalid inputs" $ do
           for_ [(0, "23"), (6, ""), (6, "77")] $ \(base, str) ->
             let baseText = tShow (base :: Int)
-            in expectFail [text|(defun test:integer () (str-to-int $baseText "$str"))|] $
+            in expectFail [trimming|(defun test:integer () (str-to-int $baseText "$str"))|] $
                  Valid Success'
 
       describe "symbolic string and concrete base" $ do
         describe "only base 10 is supported" $ do
-          expectPass [text| (defun test:integer (s:string) (str-to-int 10 s)) |] $
+          expectPass [trimming| (defun test:integer (s:string) (str-to-int 10 s)) |] $
             Satisfiable Success'
-          expectFail [text| (defun test:integer (s:string) (str-to-int 8 s)) |] $
+          expectFail [trimming| (defun test:integer (s:string) (str-to-int 8 s)) |] $
             Satisfiable Success'
 
       describe "concrete string and symbolic base" $ do
         expectVerified
-          [text|
+          [trimming|
             (defun test:integer (base:integer)
               @model [(property (when (= result 8) (= base 8)))]
               (str-to-int base "10"))
@@ -2280,12 +2280,12 @@ spec = describe "analyze" $ do
 
       describe "symbolic string and symbolic base" $ do
         describe "unsupported" $ do
-          expectFail [text| (defun test:integer (b:integer s:string) (str-to-int b s)) |] $
+          expectFail [trimming| (defun test:integer (b:integer s:string) (str-to-int b s)) |] $
             Satisfiable Success'
 
   describe "big round" $
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let ((x:decimal 5230711750420325051373061834485335325985428731552400523071175042032505137306183448533532598542873155240052307117504203250513730.618344853353259854287315524005230711750420325051373061834485335325985428731552400523071175042032505137306183448533532598542873155240052307117504203250513730618344853353259854287315524005230711750420325051373061834485335325985428731552400523071175042032505)
                     (y:integer 300))
@@ -2295,7 +2295,7 @@ spec = describe "analyze" $ do
 
   describe "arith" $
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let ((xI:integer 1)
                     (yI:integer 2)
@@ -2427,7 +2427,7 @@ spec = describe "analyze" $ do
 
   describe "schema-invariants" $ do
     let code =
-          [text|
+          [trimming|
             (defschema ints-row
               @doc "doc"
               @model
@@ -2451,7 +2451,7 @@ spec = describe "analyze" $ do
 
   describe "schema-invariants.not-equals" $ do
     let code =
-          [text|
+          [trimming|
             (defschema ints-row
               @doc   "doc"
               @model [(invariant (!= nonzero 0))]
@@ -2471,7 +2471,7 @@ spec = describe "analyze" $ do
 
   describe "schema-invariants.equals" $ do
     let code =
-          [text|
+          [trimming|
             (defschema ints-row
               @doc   "doc"
               @model [(invariant (= zero 0))]
@@ -2492,7 +2492,7 @@ spec = describe "analyze" $ do
   describe "schema-invariants.var-out-of-scope-regression" $ do
     describe "for reads" $ do
       expectVerified
-        [text|
+        [trimming|
           (defschema coin-schema
             @model [(invariant (<= 0.0 balance))]
             balance:decimal
@@ -2506,7 +2506,7 @@ spec = describe "analyze" $ do
 
     describe "for writes" $ do
       expectVerified
-        [text|
+        [trimming|
           (defschema coin-schema
             @model [(invariant (= 0.0 balance))]
             balance:decimal
@@ -2519,7 +2519,7 @@ spec = describe "analyze" $ do
 
   describe "format-time / parse-time" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (let* ((time1in  "2016-09-12")
                      (time1    (parse-time "%F" time1in))
@@ -2545,7 +2545,7 @@ spec = describe "analyze" $ do
 
   describe "format" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool (str:string)
               (enforce (= (format "{}-{}" ["a" "z"]) "a-z") "")
               (enforce (= (format "{}/{}" [11 26]) "11/26") "")
@@ -2558,7 +2558,7 @@ spec = describe "analyze" $ do
 
   describe "hash" $ do
     let code =
-          [text|
+          [trimming|
             (defun test:bool ()
               (enforce (=
                 (hash "hello")
@@ -2592,7 +2592,7 @@ spec = describe "analyze" $ do
 
   describe "enforce-keyset.row-level.read" $ do
     let code =
-          [text|
+          [trimming|
             (defschema central-bank-schema
               @doc   "central bank"
               @model
@@ -2688,7 +2688,7 @@ spec = describe "analyze" $ do
       -- as `exists i j. i > 0 /\ not (j > 0)`, which _is_ true.
       --
       -- https://github.com/LeventErkok/sbv/issues/256
-      let code' = [text|
+      let code' = [trimming|
             (defun test:bool ()
               @model
                 [ (property
@@ -2703,7 +2703,7 @@ spec = describe "analyze" $ do
   describe "invariant features" $ do
     describe "string concatenation" $ do
       let code =
-            [text|
+            [trimming|
               (defschema sch
                 @model [(invariant (= (+ col col) "abcabc"))]
                 col:string)
@@ -2716,7 +2716,7 @@ spec = describe "analyze" $ do
 
     describe "string length" $ do
       let code =
-            [text|
+            [trimming|
               (defschema sch
                 @model [(invariant (= (length col) 1))]
                 col:string)
@@ -2729,7 +2729,7 @@ spec = describe "analyze" $ do
 
     describe "string to int" $ do
       expectVerified
-        [text|
+        [trimming|
           (defschema sch
             @model [(invariant (= (str-to-int col) 50))]
             col:string)
@@ -2741,7 +2741,7 @@ spec = describe "analyze" $ do
 
     describe "string contains" $ do
       expectVerified
-        [text|
+        [trimming|
           (defschema sch
             @model [(invariant (contains "foo" col))]
             col:string)
@@ -2753,7 +2753,7 @@ spec = describe "analyze" $ do
 
     describe "floor on decimal balance using constant" $ do
       expectVerified
-        [text|
+        [trimming|
           (defconst MINIMUM_PRECISION 12
             "Minimum allowed precision for coin transactions")
           (defschema coin-schema
@@ -2999,7 +2999,7 @@ spec = describe "analyze" $ do
 
     it "parses quantified columns" $ do
       pendingWith "parsing quantified table names"
-      inferProp'' [text|
+      inferProp'' [trimming|
         (forall (table:table)
           (forall (column:(column-of table))
             (column-written table column)))
@@ -3035,7 +3035,7 @@ spec = describe "analyze" $ do
 
   describe "table quantification" $ do
     let code =
-          [text|
+          [trimming|
             (defschema simple-schema balance:integer)
             (deftable simple-table:{simple-schema})
 
@@ -3074,7 +3074,7 @@ spec = describe "analyze" $ do
 
   describe "column-read" $ do
     expectVerified $
-      [text|
+      [trimming|
         (defschema sch a:integer b:integer)
         (deftable tab:{sch})
 
@@ -3089,7 +3089,7 @@ spec = describe "analyze" $ do
 
   describe "column quantification" $ do
     let code =
-          [text|
+          [trimming|
             (defschema simple-schema balance:integer)
             (deftable simple-table:{simple-schema})
 
@@ -3160,7 +3160,7 @@ spec = describe "analyze" $ do
       pretty' schema `shouldBe` "{balance: integer,name: string}"
 
   describe "at-properties verify" $ do
-    let code = [text|
+    let code = [trimming|
           (defschema user
             @doc "user info"
             @model
@@ -3190,7 +3190,7 @@ spec = describe "analyze" $ do
     expectVerified code
 
   describe "user-defined properties verify" $ do
-    let code = [text|
+    let code = [trimming|
           (defun test:string (from:string to:string)
             @model
               [ (property (my-column-delta 0))
@@ -3205,7 +3205,7 @@ spec = describe "analyze" $ do
           |]
     expectVerified code
 
-    let code' model = [text|
+    let code' model = [trimming|
           (defun test:string (from:string to:string)
             @model $model
             (enforce (!= from to) "sender and receive must not be the same")
@@ -3221,14 +3221,14 @@ spec = describe "analyze" $ do
 
   -- user-defined properties can't be recursive
   describe "user-defined properties can't be recursive" $ do
-    let code = [text|
+    let code = [trimming|
           (defun test:string (from:string to:string)
             @model [(property bad-recursive-prop)]
             "foo")
           |]
     expectFalsified code
 
-    let code' = [text|
+    let code' = [trimming|
           (defun test:string (from:string to:string)
             @model [(property (bad-recursive-prop2 0))]
             "foo")
@@ -3272,7 +3272,7 @@ spec = describe "analyze" $ do
 
     describe "is a linearized trace of events" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:string (from:string to:string amount:integer)
                 "Transfer money between accounts"
                 (let ((from-bal (at 'balance (read accounts from)))
@@ -3291,7 +3291,7 @@ spec = describe "analyze" $ do
 
     describe "doesn't include events excluded by a conditional" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:string ()
                 (if false
                   (insert accounts "stu" {"balance": 5}) ; impossible
@@ -3301,7 +3301,7 @@ spec = describe "analyze" $ do
 
     describe "doesn't include events after a failed enforce" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:integer ()
                 (write accounts "test" {"balance": 5})
                 (enforce false "")
@@ -3311,7 +3311,7 @@ spec = describe "analyze" $ do
 
     describe "doesn't include cases after a successful enforce-one case" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce-one ""
                   [(enforce false "")
@@ -3324,7 +3324,7 @@ spec = describe "analyze" $ do
 
     describe "doesn't include events after the first failure in an enforce-one case" $ do
       let code =
-            [text|
+            [trimming|
               (defun test:bool ()
                 (enforce-one ""
                   [(let ((x (enforce false "")))
@@ -3338,7 +3338,7 @@ spec = describe "analyze" $ do
     -- The falsifying model we should get executes the first step successfully,
     -- then cancels.
     describe "trace of a pact execution" $ do
-      let code = [text|
+      let code = [trimming|
         (defpact test (acct:string)
           (step
             (let ((yield-me:object{account} { 'balance: 1 }))
@@ -3359,7 +3359,7 @@ spec = describe "analyze" $ do
         [push, push, push, write, yield, pop, pop, reset, path, cancel, pop]
 
   describe "references to module constants" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defconst FOO "FOO")
 
       (defun test:string ()
@@ -3368,7 +3368,7 @@ spec = describe "analyze" $ do
       |]
 
   describe "module-scoped properties verify" $ do
-    let okay = [text|
+    let okay = [trimming|
           (defun okay:string (from:string to:string)
             (enforce (!= from to) "sender and receive must not be the same")
             (with-read accounts from { "balance" := from-bal }
@@ -3376,7 +3376,7 @@ spec = describe "analyze" $ do
                 (update accounts from { "balance": (- from-bal 1) })
                 (update accounts to   { "balance": (+ to-bal 1) }))))
           |]
-        bad = [text|
+        bad = [trimming|
           (defun bad:string ()
             (with-read accounts "joel" { "balance" := bal }
               (update accounts "joel" { "balance": (+ bal 1000000000) })))
@@ -3400,7 +3400,7 @@ spec = describe "analyze" $ do
     expectFalsified' "(property conserves-balance {'only:   [bad]})" bad
 
   describe "read (property)" $ do
-    let code1 = [text|
+    let code1 = [trimming|
           (defun test:object{account} (acct:string)
             @model [(property (= result (read accounts acct 'before)))]
             (read accounts acct))
@@ -3408,14 +3408,14 @@ spec = describe "analyze" $ do
     expectVerified code1
 
     -- reading from a different account
-    let code2 = [text|
+    let code2 = [trimming|
           (defun test:object{account} (acct:string)
             @model [(property (= result (read accounts acct 'before)))]
             (read accounts 'brian))
           |]
     expectFalsified code2
 
-    let code3 = [text|
+    let code3 = [trimming|
           (defun test:string (acct:string)
             @model
               [ (property
@@ -3427,7 +3427,7 @@ spec = describe "analyze" $ do
     expectVerified code3
 
     -- writing to a different account
-    let code4 = [text|
+    let code4 = [trimming|
           (defun test:string (acct:string)
             @model
               [ (property
@@ -3438,7 +3438,7 @@ spec = describe "analyze" $ do
           |]
     expectFalsified code4
 
-    let code5 = [text|
+    let code5 = [trimming|
           (defun test:string (acct:string)
             @model
               [ (property
@@ -3452,7 +3452,7 @@ spec = describe "analyze" $ do
     expectVerified code5
 
     -- writing to a different account
-    let code6 = [text|
+    let code6 = [trimming|
           (defun test:string (acct:string)
             @model
               [ (property
@@ -3465,7 +3465,7 @@ spec = describe "analyze" $ do
           |]
     expectFalsified code6
 
-    let code7 = [text|
+    let code7 = [trimming|
           (defun test:string (acct:string)
             @model
               [ (property
@@ -3508,7 +3508,7 @@ spec = describe "analyze" $ do
     --   Inj (IntegerComparison Eq (readBalance Before) (readBalance After))
 
   describe "list literals" $ do
-    let code0 model = [text|
+    let code0 model = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model $model
             [a b c])
@@ -3517,7 +3517,7 @@ spec = describe "analyze" $ do
     expectFalsified $ code0 "[(property (= result [a b]))]"
 
   describe "deprecated list literals" $ do
-    let code0 = [text|
+    let code0 = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             (list a b c))
           |]
@@ -3525,7 +3525,7 @@ spec = describe "analyze" $ do
     expectFail code0 $ Satisfiable $ Inj Success
 
   describe "make-list" $ do
-    let code = [text|
+    let code = [trimming|
           (defun test:[integer] (a:integer)
             @model
               [ (property (= (length result) 5))
@@ -3546,7 +3546,7 @@ spec = describe "analyze" $ do
     expectVerified code
 
   describe "list drop" $ do
-    let code1 model = [text|
+    let code1 model = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model $model
             (drop 2 [a b c]))
@@ -3554,7 +3554,7 @@ spec = describe "analyze" $ do
     expectVerified  $ code1 "[(property (= result [c]))]"
     expectFalsified $ code1 "[(property (= result [b c]))]"
 
-    let code1' model = [text|
+    let code1' model = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model $model
             (drop -1 [a b c]))
@@ -3562,7 +3562,7 @@ spec = describe "analyze" $ do
     expectVerified  $ code1' "[(property (= result [a b]))]"
     expectFalsified $ code1' "[(property (= result [a]))]"
 
-    let code2 = [text|
+    let code2 = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model [(property (= result []))
                     (property (= (length result) 0))
@@ -3572,7 +3572,7 @@ spec = describe "analyze" $ do
     expectVerified code2
 
   describe "list take" $ do
-    let code3 model = [text|
+    let code3 model = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model $model
             (take 2 [a b c]))
@@ -3580,7 +3580,7 @@ spec = describe "analyze" $ do
     expectVerified  $ code3 "[(property (= result [a b]))]"
     expectFalsified $ code3 "[(property (= result [b c]))]"
 
-    let code3' model = [text|
+    let code3' model = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model $model
             (take -2 [a b c]))
@@ -3588,7 +3588,7 @@ spec = describe "analyze" $ do
     expectVerified  $ code3' "[(property (= result [b c]))]"
     expectFalsified $ code3' "[(property (= result [a b]))]"
 
-    let code4 = [text|
+    let code4 = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model [(property (= result [a b c]))
                     (property (= (length result) 3))
@@ -3597,7 +3597,7 @@ spec = describe "analyze" $ do
           |]
     expectVerified code4
 
-    let code5 = [text|
+    let code5 = [trimming|
           (defun test:bool (a:integer b:integer c:integer)
             @model [(property (= result true))]
             (= [] (take 0 [a b c])))
@@ -3605,14 +3605,14 @@ spec = describe "analyze" $ do
     expectVerified code5
 
   describe "list at" $ do
-    let code5 = [text|
+    let code5 = [trimming|
           (defun test:integer (a:integer b:integer c:integer)
             @model [(property (= result a))]
             (at 0 [a b c]))
           |]
     expectVerified code5
 
-    let code6' = [text|
+    let code6' = [trimming|
           (defun test:integer (ix:integer)
             @model [(property (= result ix))]
             (at ix [0 1 2]))
@@ -3620,14 +3620,14 @@ spec = describe "analyze" $ do
     expectVerified code6'
     expectPass code6' $ Satisfiable Abort'
 
-    let code6'' = [text|
+    let code6'' = [trimming|
           (defun test:integer (list:[integer])
             @model [(property (when (> (length list) 2) (= result (at 2 list))))]
             (at 2 list))
           |]
     expectVerified code6''
 
-    let code6''' = [text|
+    let code6''' = [trimming|
           (defun test:integer (list:[integer])
             @model [(property (= result (at 2 list)))]
             (at 2 list))
@@ -3636,7 +3636,7 @@ spec = describe "analyze" $ do
     it "query fails" $ result `shouldSatisfy` isJust
 
   describe "string contains" $ do
-    let code7 = [text|
+    let code7 = [trimming|
           (defun test:bool ()
             @model [(property (= result true))]
             (contains "foo" "foobar"))
@@ -3644,7 +3644,7 @@ spec = describe "analyze" $ do
     expectVerified code7
 
   describe "list contains" $ do
-    let code8 model = [text|
+    let code8 model = [trimming|
           (defun test:bool (a:integer b:integer c:integer)
             @model $model
             (contains a [a b c]))
@@ -3653,7 +3653,7 @@ spec = describe "analyze" $ do
     expectFalsified $ code8 "[(property (= result false))]"
 
   describe "list concat" $ do
-    let code9 model = [text|
+    let code9 model = [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model $model
             (+ [a b] [c]))
@@ -3662,14 +3662,14 @@ spec = describe "analyze" $ do
     expectVerified  $ code9 "[(property (= result (+ [a] [b c])))]"
 
   describe "list reverse" $ do
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:[integer] (a:integer b:integer c:integer)
             @model [(property (= result (reverse [a b c])))]
             [c b a])
           |]
 
   describe "list sort" $ do
-    expectVerified [text|
+    expectVerified [trimming|
           (defun min:integer (x:integer y:integer)
             (if (< x y) x y))
 
@@ -3679,33 +3679,33 @@ spec = describe "analyze" $ do
           |]
 
   describe "identity" $ do
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:integer ()
             @model []
             (identity 1))
           |]
 
   describe "list map" $ do
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:[integer] ()
             @model [(property (= result [1 2 3]))]
             (map (identity) [1 2 3]))
           |]
 
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:[integer] ()
             @model [(property (= result [2 3 4]))]
             (map (+ 1) [1 2 3]))
           |]
 
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:[integer] ()
             @model [(property (= result [1 1 1]))]
             (map (constantly 1) [1 2 3]))
           |]
 
     describe "constantly" $ do
-      expectVerified [text|
+      expectVerified [trimming|
             (defun test:[integer] ()
               @model [(property (= result [2 2 2]))]
               (map (compose (constantly 1) (+ 1)) [1 2 3]))
@@ -3713,41 +3713,41 @@ spec = describe "analyze" $ do
 
       it "ignores multiple variables" $ pendingWith "implementation"
 
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:[integer] ()
             @model [(property (= result [1 1 1]))]
             (map (compose (+ 1) (constantly 1)) [1 2 3]))
           |]
 
   describe "list filter" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:[integer] ()
         @model [(property (= result [2 3 4]))]
         (filter (> 5) [2 6 3 7 4 8]))
       |]
 
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:[string] ()
         @model [(property (= result ["dog" "has" "fleas"]))]
         (filter (compose (length) (< 2)) ["my" "dog" "has" "fleas"]))
       |]
 
   describe "list fold" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:integer ()
         @model [(property (= result 115))]
         (fold (+) 0 [100 10 5]))
       |]
 
   describe "and?" $ do
-    expectVerified [text|
+    expectVerified [trimming|
           (defun test:bool ()
             @model [(property (= result false))]
             (and? (> 20) (> 10) 15))
           |]
 
   describe "or?" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:bool ()
         @model [(property (= result true))]
         (or? (> 20) (> 10) 15))
@@ -3758,7 +3758,7 @@ spec = describe "analyze" $ do
 --      pendingWith "implementation"
 
   describe "typeof" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:string ()
         @model [(property (= result "string"))]
         (typeof "foo"))
@@ -3766,7 +3766,7 @@ spec = describe "analyze" $ do
 
   -- TODO: pending sbv unicode fix
   -- describe "unicode strings" $
-  --   let code = [text|
+  --   let code = [trimming|
   --         (defun test:string ()
   --           @model [(property (= result "foo"))]
   --           (format-time "%j%V%l\246806\941262\743680\111256\291942\925764%u%M\413482\881382\334334\465271\899033\560560\47211\75894\501994\417096%w%r\507953\1007703\1111496\1088522\37264\325569\357465\769605\960665\527873\218746\570536\389358\202229\870795%l\476745\322505\570838\545020\965973\1052968\868090\746731\25721\233682\1055404\91996\51906\278110\1104222\629147\1033543\1083315\318365\449369\186461\884415\293431\257589\601947\971770\880368\881194\497135\354885%V%V" (parse-time "" "")))
@@ -3777,7 +3777,7 @@ spec = describe "analyze" $ do
     it "read after write" $ do
       pendingWith "partial row typechecking (#360)"
       -- let code =
-      --       [text|
+      --       [trimming|
       --         (defschema token-row
       --           name:string
       --           balance:integer)
@@ -3796,7 +3796,7 @@ spec = describe "analyze" $ do
       -- We read only the name column from the database then try to read
       -- balance
       -- let code =
-      --       [text|
+      --       [trimming|
       --         (defschema token-row
       --           name:string
       --           balance:integer)
@@ -3811,21 +3811,21 @@ spec = describe "analyze" $ do
 
   describe "using a separate function to state properties of multiple function calls" $ do
     describe "associativity of addition" $ do
-      expectVerified [text|
+      expectVerified [trimming|
         (defun test:bool (a:integer b:integer c:integer)
           @model [ (property result) ]
           (= (+ a (+ b c)) (+ (+ a b) c)))
         |]
 
     describe "associativity of list concatenation" $ do
-      expectVerified [text|
+      expectVerified [trimming|
         (defun test:bool (a:[integer] b:[integer] c:[integer])
           @model [ (property result) ]
           (= (+ a (+ b c)) (+ (+ a b) c)))
         |]
 
     describe "testing monotonicity of a function" $ do
-      expectVerified [text|
+      expectVerified [trimming|
         (defun f:integer (x:integer)
           (if (< x 0) (- x 5) (- x 3)))
 
@@ -3840,7 +3840,7 @@ spec = describe "analyze" $ do
 
   describe "checking pacts" $ do
     describe "working payment (step checking)" $
-      expectVerified [text|
+      expectVerified [trimming|
         (defpact payment (payer payer-entity payee
                           payee-entity amount:integer)
           @model
@@ -3870,7 +3870,7 @@ spec = describe "analyze" $ do
 
     describe "failing payment (step checking)" $
       -- TODO: check trace
-      expectFalsified [text|
+      expectFalsified [trimming|
         (defpact payment (payer:string payer-entity:string payee:string
                           payee-entity:string amount:integer
                           payer-bal:integer payee-bal:integer)
@@ -3900,7 +3900,7 @@ spec = describe "analyze" $ do
         |]
 
     describe "single-step pact" $ do
-      expectVerified [text|
+      expectVerified [trimming|
             (defpact payment ()
               @model
                 [ (property (= (column-delta accounts 'balance) 0))
@@ -3913,14 +3913,14 @@ spec = describe "analyze" $ do
                   (update accounts acct { "balance": (+ bal amt) }))))
             |]
 
-      expectVerified [text|
+      expectVerified [trimming|
         (defpact payment ()
           @model [ (property (= (column-delta accounts 'balance) 0)) ]
           (step "foo"))
         |]
 
     describe "many-step pact" $
-      expectVerified [text|
+      expectVerified [trimming|
         (defpact payment ()
           @model
             [ (property (= (column-delta accounts 'balance) 0))
@@ -3939,7 +3939,7 @@ spec = describe "analyze" $ do
         |]
 
     describe "nontrivial many step pact" $
-      expectVerified [text|
+      expectVerified [trimming|
         (defpact payment ()
           @model
             [ (property (= (column-delta accounts 'balance) 0))
@@ -3971,7 +3971,7 @@ spec = describe "analyze" $ do
         |]
 
     describe "yield / resume" $
-      expectVerified [text|
+      expectVerified [trimming|
         (defschema schema-pact-id pact-id:string)
 
         (defpact payment (acct amount)
@@ -3988,7 +3988,7 @@ spec = describe "analyze" $ do
         |]
 
     describe "yield with chain-id specified" $
-      expectVerified [text|
+      expectVerified [trimming|
         (defschema yield-obj val:integer)
 
         (defpact foo ()
@@ -4002,7 +4002,7 @@ spec = describe "analyze" $ do
         |]
 
   describe "with-default-read" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:integer (acct:string)
         @model
           [(property
@@ -4013,7 +4013,7 @@ spec = describe "analyze" $ do
           balance))
       |]
 
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:integer (acct:string)
         @model
           [(property
@@ -4025,7 +4025,7 @@ spec = describe "analyze" $ do
       |]
 
   describe "succeeds-when / fails-when" $ do
-    expectVerified [text|
+    expectVerified [trimming|
       (defun test:bool (x:integer)
         @model [
           ; this succeeds exactly when x > 0, and fails exactly when x <= 0
@@ -4041,7 +4041,7 @@ spec = describe "analyze" $ do
 
     -- succeeds-when / fails-when also work at the module level
     expectVerified'
-      [text|
+      [trimming|
         (succeeds-when (> x 0))
         (fails-when    (<= x 0))
 
@@ -4054,7 +4054,7 @@ spec = describe "analyze" $ do
       "(defun test:bool (x:integer) (enforce (> x 0) \"\"))"
 
   describe "scope-checking interfaces" $ do
-    res <- runIO $ checkInterface [text|
+    res <- runIO $ checkInterface [trimming|
       (interface coin-sig
         (defun transfer:string (sender:string receiver:string receiver-guard:guard amount:decimal)
           @model [ (property (> amount 0.0))
@@ -4065,7 +4065,7 @@ spec = describe "analyze" $ do
       |]
     it "flags reciever != receiver" $ isJust res
 
-    res' <- runIO $ checkInterface [text|
+    res' <- runIO $ checkInterface [trimming|
       (interface coin-sig
         (defun transfer:string (sender:string receiver:string receiver-guard:guard amount:decimal)
           @model [ (property (> amount 0.0))
@@ -4077,7 +4077,7 @@ spec = describe "analyze" $ do
     it "checks when spelled correctly" $ isNothing res'
 
   describe "vacuous property produces error" $ do
-    expectFalsifiedMessage [text|
+    expectFalsifiedMessage [trimming|
       (defun test:bool (x:integer)
         @model [(property false)] ; here we can "prove" anything with property
         (enforce false ""))
